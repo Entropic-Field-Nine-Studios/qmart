@@ -1,7 +1,8 @@
 package com.mattrition.qmart.config
 
 import com.mattrition.qmart.auth.CustomUserDetailsService
-import com.mattrition.qmart.auth.JwtAuthenticationFilter
+import com.mattrition.qmart.auth.filters.JwtAuthenticationFilter
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
@@ -73,7 +74,11 @@ class SecurityConfig {
             .addFilterBefore(
                 jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter::class.java,
-            )
+            ).exceptionHandling { exceptions ->
+                exceptions.authenticationEntryPoint { _, response, _ ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+                }
+            }
 
         return http.build()
     }

@@ -23,14 +23,16 @@ class JwtService(
      * @param username Subject of the token
      * @param id The user's ID
      * @param role The user's role
+     * @param expirationMillis Expiration in milliseconds
      */
     fun generateToken(
         username: String,
         id: UUID,
         role: String,
+        expirationMillis: Long,
     ): String {
         val now = Date()
-        val expiry = Date(now.time + 1000 * 60 * 60 * 24) // 24 hours
+        val expiry = Date(now.time + expirationMillis) // 24 hours
 
         return Jwts
             .builder()
