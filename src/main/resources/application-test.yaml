@@ -19,6 +19,10 @@ app:
 jwt:
   secret: qKbdSQ3bgLRZJWH29euWFYxG2PZrBCEgPQJWPOs0v1P
 
+cors:
+  allowed-origins:
+    - http://localhost:4200
+
 jobs:
-  autoComplete:
+  auto-complete:
     cron: "0 0 10 * * *"

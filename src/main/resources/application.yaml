@@ -2,45 +2,31 @@ spring:
   application:
     name: quantum-mart-services
 
-  config:
-    activate:
-      on-profile: dev
-
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-  flyway:
-    url: ${DB_URL}
-    user: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+  profiles:
+    default: dev
 
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  web:
+    error:
+      include-message: always
+
   jpa:
-    hibernate:
-      ddl-auto: validate
     show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-
-app:
-  public-url: ${PUBLIC_URL:http://localhost:8080}
-
-jwt:
-  secret: 1d2i0jf0923thg91wd1uegh03hth13irh9fj31h12rh129
 
 logging:
   level:
     root: INFO
     org:
-      hibernate:
-        orm:
-          connections:
-            # Disables showing database information on startup
-            pooling: WARN
+      # Disables showing database information on startup
+      hibernate.orm.connections.pooling: WARN
+      # Prevent logger noise on malformed HTTP requests
+      apache:
+        catalina.connector.CoyoteAdapter: ERROR
+        coyote.http11:
+          Http11InputBuffer: ERROR
+          Http11Processor: ERROR
+        tomcat.util.http.parser.HttpParser: ERROR

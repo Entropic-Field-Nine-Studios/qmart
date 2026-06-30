@@ -1,4 +1,33 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  flyway:
+    url: ${DB_URL}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  secret: ${JWT_SECRET:1d2i0jf0923thg91wd1uegh03hth13irh9fj31h12rh129}
+
+cors:
+  allowed-origins:
+    - http://localhost:4200
+
+logging:
+  level:
+    com.mattrition.qmart: DEBUG
+
 jobs:
-  autoComplete:
+  auto-complete:
     # Runs every 5 minutes
     cron: "0 */5 * * * *"

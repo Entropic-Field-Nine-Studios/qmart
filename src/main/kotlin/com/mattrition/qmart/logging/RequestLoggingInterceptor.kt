@@ -42,7 +42,7 @@ class RequestLoggingInterceptor : HandlerInterceptor {
         builder.append("uri: \"${request.requestURI}\"")
         builder.append(" }")
 
-        log.info(builder.toString())
+        log.debug(builder.toString())
         return true
     }
 
@@ -71,6 +71,6 @@ class RequestLoggingInterceptor : HandlerInterceptor {
         builder.append("uri: \"${request.requestURI}\"")
         builder.append(" }")
 
-        log.info(builder.toString())
+        log.debug(builder.toString())
     }
 }

@@ -2,7 +2,9 @@ package com.mattrition.qmart.config
 
 import com.mattrition.qmart.auth.CustomUserDetailsService
 import com.mattrition.qmart.auth.filters.JwtAuthenticationFilter
+import com.mattrition.qmart.config.properties.CorsProps
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
@@ -22,6 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableMethodSecurity(jsr250Enabled = true)
+@EnableConfigurationProperties(CorsProps::class)
 class SecurityConfig {
     @Bean fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
@@ -47,9 +50,9 @@ class SecurityConfig {
         )
 
     @Bean
-    fun corsConfigurationSource(): CorsConfigurationSource {
+    fun corsConfigurationSource(corsProps: CorsProps): CorsConfigurationSource {
         val config = CorsConfiguration()
-        config.allowedOrigins = listOf("http://localhost:4200")
+        config.allowedOriginPatterns = corsProps.allowedOrigins
         config.allowedMethods = listOf("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")
         config.allowedHeaders = listOf("Authorization", "Content-Type")
         config.allowCredentials = true
@@ -64,10 +67,11 @@ class SecurityConfig {
         http: HttpSecurity,
         jwtAuthenticationFilter: JwtAuthenticationFilter,
         authenticationProvider: AuthenticationProvider,
+        corsProps: CorsProps,
     ): SecurityFilterChain {
         http
             .csrf { it.disable() } // CSRF is not needed for stateless APIs (which is JWT)
-            .cors {}
+            .cors { it.configurationSource(corsConfigurationSource(corsProps)) }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth -> auth.anyRequest().permitAll() }
             .authenticationProvider(authenticationProvider)

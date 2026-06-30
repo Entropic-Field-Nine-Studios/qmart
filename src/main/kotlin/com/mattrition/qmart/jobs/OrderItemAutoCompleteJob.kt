@@ -21,7 +21,7 @@ class OrderItemAutoCompleteJob(
     private val log = LoggerFactory.getLogger(OrderItemAutoCompleteJob::class.java)
 
     @Transactional
-    @Scheduled(cron = $$"${jobs.autoComplete.cron}")
+    @Scheduled(cron = $$"${jobs.auto-complete.cron}")
     fun autoCompleteShippedOrders() {
         log.info("AutoCompleteJob started")
 
