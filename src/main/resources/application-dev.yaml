@@ -16,6 +16,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+images:
+  provider: ${IMAGE_PROVIDER:LOCAL}
+  upload-dir: storage/uploads
+  bucket: ${IMAGE_BUCKET:}
+  base-url: "${IMAGE_BASE_URL:http://localhost:8080}"
+
 jwt:
   secret: ${JWT_SECRET:1d2i0jf0923thg91wd1uegh03hth13irh9fj31h12rh129}
 

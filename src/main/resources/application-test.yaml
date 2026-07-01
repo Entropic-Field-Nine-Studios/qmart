@@ -13,8 +13,11 @@ spring:
   flyway:
     enabled: true
 
-app:
-  public-url: http://test-url
+images:
+  provider: LOCAL
+  upload-dir: uploads
+  bucket:
+  base-url:
 
 jwt:
   secret: qKbdSQ3bgLRZJWH29euWFYxG2PZrBCEgPQJWPOs0v1P

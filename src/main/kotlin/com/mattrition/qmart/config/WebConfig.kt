@@ -1,7 +1,8 @@
 package com.mattrition.qmart.config
 
+import com.mattrition.qmart.config.properties.CorsProps
+import com.mattrition.qmart.config.properties.ImageUploadProps
 import com.mattrition.qmart.logging.RequestLoggingInterceptor
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
@@ -12,19 +13,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 class WebConfig(
     private val interceptor: RequestLoggingInterceptor,
-    @Value($$"${cors.allowed-origins}") private val corsAllowedOrigins: List<String>,
+    private val imageProps: ImageUploadProps,
+    private val corsProps: CorsProps,
 ) : WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {
         registry
             .addMapping("/**")
-            .allowedOriginPatterns(*corsAllowedOrigins.toTypedArray())
+            .allowedOriginPatterns(*corsProps.allowedOrigins.toTypedArray())
             .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")
             .allowedHeaders("*")
             .allowCredentials(true)
     }
 
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-        registry.addResourceHandler("/uploads/**").addResourceLocations("file:uploads/")
+        registry
+            .addResourceHandler("/uploads/**")
+            .addResourceLocations("file:${imageProps.uploadDir}/")
     }
 
     override fun addInterceptors(registry: InterceptorRegistry) {
