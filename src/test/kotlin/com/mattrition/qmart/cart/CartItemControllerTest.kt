@@ -248,7 +248,7 @@ class CartItemControllerTest : BaseH2Test() {
             ).andExpect(status().isForbidden)
 
             mockRequest(requestType = DELETE, path = routePath, accessToken = null)
-                .andExpect(status().isForbidden)
+                .andExpect(status().isUnauthorized)
         }
 
         @Test

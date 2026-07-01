@@ -54,7 +54,7 @@ class ItemListingControllerTest : BaseH2Test() {
                 )
 
             mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = listing)
-                .andExpect(status().isForbidden)
+                .andExpect(status().isUnauthorized)
         }
 
         @Test
@@ -225,7 +225,7 @@ class ItemListingControllerTest : BaseH2Test() {
                 path = "$BASE_PATH/${listing1.id}",
                 accessToken = null,
                 body = UpdateListingRequest(price = BigDecimal(0)),
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
         }
 
         @Test

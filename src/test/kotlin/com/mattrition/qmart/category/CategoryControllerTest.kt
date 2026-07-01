@@ -61,7 +61,7 @@ class CategoryControllerTest : BaseH2Test() {
         @Test
         fun `should return 403 forbidden when retrieving every category as non-admin`() {
             mockRequest(requestType = GET, path = "$BASE_PATH/all", accessToken = null)
-                .andExpect(status().isForbidden)
+                .andExpect(status().isUnauthorized)
 
             mockRequest(
                 requestType = GET,
@@ -95,7 +95,7 @@ class CategoryControllerTest : BaseH2Test() {
             val req = CreateCategoryDto(name = "Sample Category", slug = "category")
 
             mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = req)
-                .andExpect(status().isForbidden)
+                .andExpect(status().isUnauthorized)
 
             mockRequest(
                 requestType = POST,
@@ -231,7 +231,7 @@ class CategoryControllerTest : BaseH2Test() {
                 path = "$BASE_PATH/${sampleCategory.id!!}",
                 accessToken = null,
                 body = req,
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
 
             mockRequest(
                 requestType = PATCH,

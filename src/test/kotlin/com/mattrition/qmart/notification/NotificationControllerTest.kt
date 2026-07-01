@@ -56,7 +56,7 @@ class NotificationControllerTest : BaseH2Test() {
                 requestType = GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id!!}",
                 accessToken = null,
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
         }
 
         @Test
@@ -101,7 +101,7 @@ class NotificationControllerTest : BaseH2Test() {
                 requestType = PATCH,
                 path = "$BASE_PATH/${sampleNotif.id}/hide",
                 accessToken = null,
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
 
             // Hiding all
             mockRequest(

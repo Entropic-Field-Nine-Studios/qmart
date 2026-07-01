@@ -20,7 +20,7 @@ class UserControllerTest : BaseH2Test() {
         @Test
         fun `should return 403 forbidden when no auth`() {
             mockRequest(requestType = GET, path = BASE_PATH, accessToken = null)
-                .andExpect(status().isForbidden)
+                .andExpect(status().isUnauthorized)
         }
 
         @Test

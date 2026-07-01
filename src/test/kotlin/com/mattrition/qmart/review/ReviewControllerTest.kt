@@ -75,7 +75,7 @@ class ReviewControllerTest : BaseH2Test() {
                 path = "$BASE_PATH/listing/${sampleListing1.id}",
                 accessToken = null,
                 body = request,
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
         }
 
         @Test
@@ -164,7 +164,7 @@ class ReviewControllerTest : BaseH2Test() {
                 path = "$BASE_PATH/${userReview.id}",
                 accessToken = null,
                 body = editBody,
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
 
             mockRequest(
                 requestType = PATCH,
@@ -238,7 +238,7 @@ class ReviewControllerTest : BaseH2Test() {
                 requestType = DELETE,
                 path = "$BASE_PATH/${userReview.id}",
                 accessToken = null,
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
 
             mockRequest(
                 requestType = DELETE,

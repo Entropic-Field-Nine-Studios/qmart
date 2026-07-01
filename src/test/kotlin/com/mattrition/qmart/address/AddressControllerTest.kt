@@ -55,12 +55,12 @@ class AddressControllerTest : BaseH2Test() {
         }
 
         @Test
-        fun `should return 403 forbidden on retrieving foreign addresses`() {
+        fun `should return 401 unauthorized on retrieving foreign addresses`() {
             mockRequest(
                 requestType = HttpMethod.GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id}",
                 accessToken = null,
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
 
             mockRequest(
                 requestType = HttpMethod.GET,
@@ -93,13 +93,13 @@ class AddressControllerTest : BaseH2Test() {
     @Nested
     inner class CreateAddress {
         @Test
-        fun `should return 403 forbidden for non-users creating address`() {
+        fun `should return 401 unauthorized for non-users creating address`() {
             mockRequest(
                 requestType = HttpMethod.POST,
                 path = BASE_PATH,
                 accessToken = null,
                 body = AddressMapper.toDto(sampleAddress1),
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
         }
 
         @Test
@@ -147,12 +147,12 @@ class AddressControllerTest : BaseH2Test() {
         }
 
         @Test
-        fun `should return 403 forbidden when deleting foreign address`() {
+        fun `should return 401 unauthorized when deleting foreign address`() {
             mockRequest(
                 requestType = HttpMethod.DELETE,
                 path = "$BASE_PATH/${savedAddress.id!!}",
                 accessToken = null,
-            ).andExpect(status().isForbidden)
+            ).andExpect(status().isUnauthorized)
 
             mockRequest(
                 requestType = HttpMethod.DELETE,
