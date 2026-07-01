@@ -27,6 +27,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
 import java.math.BigDecimal
@@ -82,6 +83,14 @@ abstract class BaseH2Test {
         lateinit var moderator: String
         lateinit var admin: String
         lateinit var superadmin: String
+
+        fun toMap(): Map<String, String> =
+            mapOf(
+                UserRole.USER to user,
+                UserRole.MODERATOR to moderator,
+                UserRole.ADMIN to admin,
+                UserRole.SUPERADMIN to superadmin,
+            )
     }
 
     protected object TestRefreshTokens {
@@ -242,6 +251,43 @@ abstract class BaseH2Test {
         params.forEach { (k, v) -> builder.param(k, v) }
 
         return mockMvc.perform(builder)
+    }
+
+    /**
+     * Runs mock request tests on an endpoint which verify correct permissions.
+     *
+     * @param requestType Method type of the endpoint.
+     * @param path URI of the endpoint.
+     * @param minRole Minimum level of [UserRole] permission required for access, or null if no
+     *   permission is required.
+     * @param body Data to attach on the request.
+     * @param params Any request parameters.
+     */
+    protected fun testPermissions(
+        requestType: HttpMethod,
+        path: String,
+        minRole: String? = null,
+        body: Any? = null,
+        params: Map<String, String> = emptyMap(),
+    ) {
+        // Test for non-authorization
+        val guestMatcher =
+            if (minRole != null) status().isUnauthorized else status().is2xxSuccessful
+
+        mockRequest(requestType, path, accessToken = null, body = body, params = params)
+            .andExpect(guestMatcher)
+
+        TestAccessTokens.toMap().forEach { (role, accessToken) ->
+            val expectedStatusMatcher =
+                if (UserRole.compare(minRole ?: "", role) >= 0) {
+                    status().is2xxSuccessful
+                } else {
+                    status().isForbidden
+                }
+
+            mockRequest(requestType, path, accessToken = accessToken, body = body, params = params)
+                .andExpect(expectedStatusMatcher)
+        }
     }
 
     /**
