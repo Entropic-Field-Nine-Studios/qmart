@@ -86,8 +86,12 @@ class CartItemControllerTest : BaseH2Test() {
                     itemQuantity = 1,
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = TestTokens.admin, body = req)
-                .andExpect(status().isForbidden)
+            mockRequest(
+                requestType = POST,
+                path = BASE_PATH,
+                accessToken = TestAccessTokens.admin,
+                body = req,
+            ).andExpect(status().isForbidden)
         }
 
         @Test
@@ -105,7 +109,7 @@ class CartItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = POST,
                 path = BASE_PATH,
-                token = TestTokens.superadmin,
+                accessToken = TestAccessTokens.superadmin,
                 body = req,
             ).andExpect(status().isOk)
 
@@ -129,8 +133,12 @@ class CartItemControllerTest : BaseH2Test() {
                     itemQuantity = 1,
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = TestTokens.admin, body = req)
-                .andExpect(status().isForbidden)
+            mockRequest(
+                requestType = POST,
+                path = BASE_PATH,
+                accessToken = TestAccessTokens.admin,
+                body = req,
+            ).andExpect(status().isForbidden)
         }
 
         @Test
@@ -143,7 +151,7 @@ class CartItemControllerTest : BaseH2Test() {
                     itemQuantity = 1,
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = noRequest)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = noRequest)
                 .andExpect(status().isBadRequest)
 
             val bothReq =
@@ -157,7 +165,7 @@ class CartItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = POST,
                 path = BASE_PATH,
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = bothReq,
             ).andExpect(status().isBadRequest)
         }
@@ -176,7 +184,7 @@ class CartItemControllerTest : BaseH2Test() {
                     itemQuantity = 1,
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = req)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = req)
                 .andExpect(status().isOk)
 
             val guestItems = cartItemRepository.findGuestCartItems(guestId)
@@ -194,7 +202,7 @@ class CartItemControllerTest : BaseH2Test() {
                     itemQuantity = 1,
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = req)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = req)
                 .andExpect(status().isOk)
 
             val guestItems = cartItemRepository.findGuestCartItems(guestId)
@@ -213,7 +221,7 @@ class CartItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = DELETE,
                 path = "$BASE_PATH/user/${TestUsers.user.id}",
-                token = TestTokens.superadmin,
+                accessToken = TestAccessTokens.superadmin,
             ).andExpect(status().isForbidden)
         }
 
@@ -224,7 +232,7 @@ class CartItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = DELETE,
                 path = "$BASE_PATH/user/${TestUsers.user.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
 
             cartItemRepository.findCartItemsByUserId(TestUsers.user.id!!).size shouldBe 0
@@ -233,10 +241,13 @@ class CartItemControllerTest : BaseH2Test() {
         @Test
         fun `removing an item from another cart should return forbidden 403`() {
             val routePath = "$BASE_PATH/user/${TestUsers.user.id}/listing/${listing1.id}"
-            mockRequest(requestType = DELETE, path = routePath, token = TestTokens.superadmin)
-                .andExpect(status().isForbidden)
+            mockRequest(
+                requestType = DELETE,
+                path = routePath,
+                accessToken = TestAccessTokens.superadmin,
+            ).andExpect(status().isForbidden)
 
-            mockRequest(requestType = DELETE, path = routePath, token = null)
+            mockRequest(requestType = DELETE, path = routePath, accessToken = null)
                 .andExpect(status().isForbidden)
         }
 
@@ -247,7 +258,7 @@ class CartItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = DELETE,
                 path = "$BASE_PATH/user/${TestUsers.user.id}/listing/${listing1.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
 
             cartItemRepository.findById(cartItem1.id!!).getOrNull().shouldBeNull()
@@ -259,8 +270,11 @@ class CartItemControllerTest : BaseH2Test() {
             val preItems = cartItemRepository.findGuestCartItems(guestId)
             preItems shouldHaveAtLeastSize 1
 
-            mockRequest(requestType = DELETE, path = "$BASE_PATH/guest/$guestId", token = null)
-                .andExpect(status().isOk)
+            mockRequest(
+                requestType = DELETE,
+                path = "$BASE_PATH/guest/$guestId",
+                accessToken = null,
+            ).andExpect(status().isOk)
 
             val guestItems = cartItemRepository.findGuestCartItems(guestId)
             guestItems shouldHaveSize 0
@@ -277,7 +291,7 @@ class CartItemControllerTest : BaseH2Test() {
                     itemQuantity = 1,
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = createReq)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = createReq)
                 .andExpect(status().isOk)
 
             val preItems = cartItemRepository.findGuestCartItems(guestId)
@@ -287,7 +301,7 @@ class CartItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = DELETE,
                 path = "$BASE_PATH/guest/$guestId/listing/${listing2Dto.id}",
-                token = null,
+                accessToken = null,
             ).andExpect(status().isOk)
 
             val guestItems = cartItemRepository.findGuestCartItems(guestId)
@@ -303,7 +317,7 @@ class CartItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id}",
-                token = TestTokens.superadmin,
+                accessToken = TestAccessTokens.superadmin,
             ).andExpect(status().isForbidden)
         }
 
@@ -312,14 +326,14 @@ class CartItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(2))
         }
 
         @Test
         fun `should get items from guest cart`() {
-            mockRequest(requestType = GET, path = "$BASE_PATH/guest/$guestId", token = null)
+            mockRequest(requestType = GET, path = "$BASE_PATH/guest/$guestId", accessToken = null)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(1))
         }

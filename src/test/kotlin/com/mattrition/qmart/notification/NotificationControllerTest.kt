@@ -55,7 +55,7 @@ class NotificationControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id!!}",
-                token = null,
+                accessToken = null,
             ).andExpect(status().isForbidden)
         }
 
@@ -64,7 +64,7 @@ class NotificationControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id!!}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(2))
         }
@@ -84,7 +84,7 @@ class NotificationControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id!!}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(0))
         }
@@ -100,21 +100,21 @@ class NotificationControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${sampleNotif.id}/hide",
-                token = null,
+                accessToken = null,
             ).andExpect(status().isForbidden)
 
             // Hiding all
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/user/${TestUsers.user.id}/hideAll",
-                token = TestTokens.superadmin,
+                accessToken = TestAccessTokens.superadmin,
             ).andExpect(status().isForbidden)
 
             // Reading it
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${sampleNotif.id}/read",
-                token = TestTokens.admin,
+                accessToken = TestAccessTokens.admin,
             ).andExpect(status().isForbidden)
         }
 
@@ -126,7 +126,7 @@ class NotificationControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/user/${TestUsers.user.id}/hideAll",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
 
             notificationRepo.findByUser(TestUsers.user.id!!).shouldBeEmpty()
@@ -143,7 +143,7 @@ class NotificationControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${adminNotif.id}/read",
-                token = TestTokens.admin,
+                accessToken = TestAccessTokens.admin,
             ).andExpect(status().isOk)
 
             val notif = notificationRepo.findById(adminNotif.id!!).get()
@@ -161,7 +161,7 @@ class NotificationControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${adminNotif.id}/hide",
-                token = TestTokens.admin,
+                accessToken = TestAccessTokens.admin,
             ).andExpect(status().isOk)
 
             val notif = notificationRepo.findById(adminNotif.id!!).get()

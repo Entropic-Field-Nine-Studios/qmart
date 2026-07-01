@@ -1,5 +1,6 @@
 package com.mattrition.qmart
 
+import com.mattrition.qmart.auth.CookieService
 import com.mattrition.qmart.auth.CustomUserDetails
 import com.mattrition.qmart.auth.JwtService
 import com.mattrition.qmart.category.Category
@@ -10,13 +11,13 @@ import com.mattrition.qmart.itemlisting.ItemListingRepository
 import com.mattrition.qmart.user.User
 import com.mattrition.qmart.user.UserRepository
 import com.mattrition.qmart.user.UserRole
+import jakarta.servlet.http.Cookie
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
 import java.math.BigDecimal
 import kotlin.jvm.optionals.getOrNull
+import kotlin.time.Duration.Companion.seconds
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -75,7 +77,14 @@ abstract class BaseH2Test {
      * @property admin Client with admin-level privilege.
      * @property superadmin Client with superadmin-level privilege.
      */
-    protected object TestTokens {
+    protected object TestAccessTokens {
+        lateinit var user: String
+        lateinit var moderator: String
+        lateinit var admin: String
+        lateinit var superadmin: String
+    }
+
+    protected object TestRefreshTokens {
         lateinit var user: String
         lateinit var moderator: String
         lateinit var admin: String
@@ -104,27 +113,45 @@ abstract class BaseH2Test {
                     ),
                 )
 
-            val token = jwtService.generateToken(seed.username, newUser.id!!, newUser.role)
+            val accessToken =
+                jwtService.generateToken(
+                    username = seed.username,
+                    id = newUser.id!!,
+                    role = newUser.role,
+                    expirationMillis = 5.seconds.inWholeMilliseconds,
+                )
+
+            val refreshToken =
+                jwtService.generateToken(
+                    username = seed.username,
+                    id = newUser.id!!,
+                    role = newUser.role,
+                    expirationMillis = 10.seconds.inWholeMilliseconds,
+                )
 
             when (seed.role.uppercase()) {
                 UserRole.SUPERADMIN -> {
                     TestUsers.superadmin = newUser
-                    TestTokens.superadmin = token
+                    TestAccessTokens.superadmin = accessToken
+                    TestRefreshTokens.superadmin = refreshToken
                 }
 
                 UserRole.ADMIN -> {
                     TestUsers.admin = newUser
-                    TestTokens.admin = token
+                    TestAccessTokens.admin = accessToken
+                    TestRefreshTokens.admin = refreshToken
                 }
 
                 UserRole.MODERATOR -> {
                     TestUsers.moderator = newUser
-                    TestTokens.moderator = token
+                    TestAccessTokens.moderator = accessToken
+                    TestRefreshTokens.moderator = refreshToken
                 }
 
                 else -> {
                     TestUsers.user = newUser
-                    TestTokens.user = token
+                    TestAccessTokens.user = accessToken
+                    TestRefreshTokens.user = refreshToken
                 }
             }
         }
@@ -172,14 +199,17 @@ abstract class BaseH2Test {
      *
      * @param requestType Method type of the controller.
      * @param path URI of the controller.
-     * @param token Which [TestTokens] to use for this call, or `null` if non-user.
+     * @param accessToken Which [TestAccessTokens] to use for this call, or `null` if non-user.
+     * @param refreshToken Which [TestAccessTokens] to use for the refresh token, or `null` if
+     *   non-user.
      * @param body Data body in the request for `POST` calls.
      * @param params Parameters to add to the request.
      */
     protected fun mockRequest(
         requestType: HttpMethod,
         path: String,
-        token: String?,
+        accessToken: String?,
+        refreshToken: String? = null,
         body: Any? = null,
         params: Map<String, String> = emptyMap(),
     ): ResultActions {
@@ -201,8 +231,12 @@ abstract class BaseH2Test {
                 .content(objectMapper.writeValueAsString(body))
         }
 
-        if (token != null) {
-            builder.header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+        if (accessToken != null) {
+            builder.cookie(Cookie(CookieService.ACCESS_TOKEN_NAME, accessToken))
+        }
+
+        if (refreshToken != null) {
+            builder.cookie(Cookie(CookieService.REFRESH_TOKEN_NAME, refreshToken))
         }
 
         params.forEach { (k, v) -> builder.param(k, v) }

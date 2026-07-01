@@ -48,7 +48,7 @@ class CategoryControllerTest : BaseH2Test() {
         @Test
         fun `should get only active categories`() {
             val result =
-                mockRequest(requestType = GET, path = BASE_PATH, token = null)
+                mockRequest(requestType = GET, path = BASE_PATH, accessToken = null)
                     .andExpect(status().isOk)
                     .andReturn()
 
@@ -60,18 +60,24 @@ class CategoryControllerTest : BaseH2Test() {
 
         @Test
         fun `should return 403 forbidden when retrieving every category as non-admin`() {
-            mockRequest(requestType = GET, path = "$BASE_PATH/all", token = null)
+            mockRequest(requestType = GET, path = "$BASE_PATH/all", accessToken = null)
                 .andExpect(status().isForbidden)
 
-            mockRequest(requestType = GET, path = "$BASE_PATH/all", token = TestTokens.user)
-                .andExpect(status().isForbidden)
+            mockRequest(
+                requestType = GET,
+                path = "$BASE_PATH/all",
+                accessToken = TestAccessTokens.user,
+            ).andExpect(status().isForbidden)
         }
 
         @Test
         fun `should return ALL categories`() {
             val result =
-                mockRequest(requestType = GET, path = "$BASE_PATH/all", token = TestTokens.admin)
-                    .andExpect(status().isOk)
+                mockRequest(
+                    requestType = GET,
+                    path = "$BASE_PATH/all",
+                    accessToken = TestAccessTokens.admin,
+                ).andExpect(status().isOk)
                     .andReturn()
 
             val body = result.response.contentAsString
@@ -88,16 +94,20 @@ class CategoryControllerTest : BaseH2Test() {
         fun `should return 403 forbidden when accessing as non-admin`() {
             val req = CreateCategoryDto(name = "Sample Category", slug = "category")
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = req)
-                .andExpect(status().isForbidden)
-
-            mockRequest(requestType = POST, path = BASE_PATH, token = TestTokens.user, body = req)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = req)
                 .andExpect(status().isForbidden)
 
             mockRequest(
                 requestType = POST,
                 path = BASE_PATH,
-                token = TestTokens.moderator,
+                accessToken = TestAccessTokens.user,
+                body = req,
+            ).andExpect(status().isForbidden)
+
+            mockRequest(
+                requestType = POST,
+                path = BASE_PATH,
+                accessToken = TestAccessTokens.moderator,
                 body = req,
             ).andExpect(status().isForbidden)
         }
@@ -106,8 +116,12 @@ class CategoryControllerTest : BaseH2Test() {
         fun `should create category`() {
             val req = CreateCategoryDto(name = "Sample Category", slug = "category")
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = TestTokens.admin, body = req)
-                .andExpect(status().isCreated)
+            mockRequest(
+                requestType = POST,
+                path = BASE_PATH,
+                accessToken = TestAccessTokens.admin,
+                body = req,
+            ).andExpect(status().isCreated)
 
             categoryRepository.findCategoryBySlug(req.slug).shouldNotBeNull()
         }
@@ -148,7 +162,7 @@ class CategoryControllerTest : BaseH2Test() {
                 mockRequest(
                     requestType = POST,
                     path = BASE_PATH,
-                    token = TestTokens.admin,
+                    accessToken = TestAccessTokens.admin,
                     body = req,
                 ).andExpect { result ->
                     if (result.response.status != HttpStatus.BAD_REQUEST.value()) {
@@ -167,8 +181,12 @@ class CategoryControllerTest : BaseH2Test() {
 
             val req = CreateCategoryDto(name = "Test 2", slug = "TEST")
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = TestTokens.admin, body = req)
-                .andExpect(status().isForbidden)
+            mockRequest(
+                requestType = POST,
+                path = BASE_PATH,
+                accessToken = TestAccessTokens.admin,
+                body = req,
+            ).andExpect(status().isForbidden)
         }
     }
 
@@ -192,7 +210,7 @@ class CategoryControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${sampleCategory.id!!}",
-                token = TestTokens.admin,
+                accessToken = TestAccessTokens.admin,
                 body = req,
             ).andExpect(status().isOk)
 
@@ -211,14 +229,14 @@ class CategoryControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${sampleCategory.id!!}",
-                token = null,
+                accessToken = null,
                 body = req,
             ).andExpect(status().isForbidden)
 
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${sampleCategory.id!!}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = req,
             ).andExpect(status().isForbidden)
         }

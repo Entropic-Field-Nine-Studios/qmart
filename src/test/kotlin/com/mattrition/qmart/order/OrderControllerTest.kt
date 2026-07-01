@@ -103,12 +103,12 @@ class OrderControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = POST,
                 path = BASE_PATH,
-                token = TestTokens.superadmin,
+                accessToken = TestAccessTokens.superadmin,
                 body = req,
             ).andExpect(status().isForbidden)
 
             // Non-authenticated request
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = req)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = req)
                 .andExpect(status().isForbidden)
         }
 
@@ -116,8 +116,12 @@ class OrderControllerTest : BaseH2Test() {
         fun `should create order for user`() {
             val req = genCreateOrder(buyerId = TestUsers.user.id!!)
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = TestTokens.user, body = req)
-                .andExpect(status().isCreated)
+            mockRequest(
+                requestType = POST,
+                path = BASE_PATH,
+                accessToken = TestAccessTokens.user,
+                body = req,
+            ).andExpect(status().isCreated)
         }
 
         @Test
@@ -129,7 +133,7 @@ class OrderControllerTest : BaseH2Test() {
                     guestEmail = "test@email.com",
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = req)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = req)
                 .andExpect(status().isCreated)
         }
 
@@ -142,7 +146,7 @@ class OrderControllerTest : BaseH2Test() {
                     guestEmail = "test@email.com", // should not matter
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = noOwnerReq)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = noOwnerReq)
                 .andExpect(status().isBadRequest)
 
             val bothOwnerReq =
@@ -155,7 +159,7 @@ class OrderControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = POST,
                 path = BASE_PATH,
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = bothOwnerReq,
             ).andExpect(status().isBadRequest)
         }
@@ -164,7 +168,7 @@ class OrderControllerTest : BaseH2Test() {
         fun `should return 400 bad request with non-user origin without guest email`() {
             val req = genCreateOrder(buyerId = null, guestSessionId = guestId, guestEmail = null)
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = req)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = req)
                 .andExpect(status().isBadRequest)
         }
 
@@ -184,7 +188,7 @@ class OrderControllerTest : BaseH2Test() {
                 mockRequest(
                     requestType = POST,
                     path = BASE_PATH,
-                    token = TestTokens.user,
+                    accessToken = TestAccessTokens.user,
                     body = req,
                 ).andExpect(status().isBadRequest)
             }
@@ -199,8 +203,12 @@ class OrderControllerTest : BaseH2Test() {
                     guestEmail = "",
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = TestTokens.user, body = req)
-                .andExpect(status().isBadRequest)
+            mockRequest(
+                requestType = POST,
+                path = BASE_PATH,
+                accessToken = TestAccessTokens.user,
+                body = req,
+            ).andExpect(status().isBadRequest)
         }
 
         @Nested
@@ -216,7 +224,7 @@ class OrderControllerTest : BaseH2Test() {
                 mockRequest(
                     requestType = POST,
                     path = BASE_PATH,
-                    token = TestTokens.user,
+                    accessToken = TestAccessTokens.user,
                     body = userRequest,
                 ).andExpect(status().isCreated)
 
@@ -233,7 +241,7 @@ class OrderControllerTest : BaseH2Test() {
                 mockRequest(
                     requestType = POST,
                     path = BASE_PATH,
-                    token = TestTokens.user,
+                    accessToken = TestAccessTokens.user,
                     body = userRequest,
                 ).andExpect(status().isCreated)
 
@@ -252,7 +260,7 @@ class OrderControllerTest : BaseH2Test() {
                 mockRequest(
                     requestType = POST,
                     path = BASE_PATH,
-                    token = TestTokens.user,
+                    accessToken = TestAccessTokens.user,
                     body = userRequest,
                 ).andExpect(status().isCreated)
 
@@ -268,7 +276,7 @@ class OrderControllerTest : BaseH2Test() {
                 mockRequest(
                     requestType = POST,
                     path = BASE_PATH,
-                    token = TestTokens.user,
+                    accessToken = TestAccessTokens.user,
                     body = userRequest,
                 ).andExpect(status().isCreated)
 
@@ -312,7 +320,7 @@ class OrderControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(1))
         }
@@ -323,7 +331,7 @@ class OrderControllerTest : BaseH2Test() {
                 mockRequest(
                     requestType = GET,
                     path = "$BASE_PATH/seller/${TestUsers.moderator.id}",
-                    token = TestTokens.moderator,
+                    accessToken = TestAccessTokens.moderator,
                     params = mapOf("unfinished" to "true"),
                 ).andExpect(status().isOk)
                     .andReturn()

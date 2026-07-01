@@ -71,7 +71,7 @@ class OrderItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${order.orderItems.first().id!!}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 params = mapOf("newStatus" to OrderItemStatus.SHIPPED.toString()),
             ).andExpect(status().isForbidden)
         }
@@ -84,7 +84,7 @@ class OrderItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${orderItem().id!!}?newStatus=${OrderItemStatus.SHIPPED}",
-                token = TestTokens.moderator,
+                accessToken = TestAccessTokens.moderator,
             ).andExpect(status().isOk)
 
             orderItem().shippedOn.shouldNotBeNull() shouldBeLessThanOrEqualTo OffsetDateTime.now()
@@ -99,7 +99,7 @@ class OrderItemControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${orderItem().id!!}?newStatus=${OrderItemStatus.CANCELED}",
-                token = TestTokens.moderator,
+                accessToken = TestAccessTokens.moderator,
             ).andExpect(status().isOk)
 
             orderItem().status shouldBe OrderItemStatus.CANCELED
@@ -116,7 +116,7 @@ class OrderItemControllerTest : BaseH2Test() {
                         mockRequest(
                             requestType = PATCH,
                             path = "$BASE_PATH/${orderItem().id!!}?newStatus=$newStatus",
-                            token = TestTokens.moderator,
+                            accessToken = TestAccessTokens.moderator,
                         ).andExpect(status().isForbidden)
 
                         orderItem().status shouldBe currentStatus
@@ -135,7 +135,7 @@ class OrderItemControllerTest : BaseH2Test() {
                     mockRequest(
                         requestType = PATCH,
                         path = "$BASE_PATH/${orderItem().id!!}?newStatus=$newStatus",
-                        token = TestTokens.moderator,
+                        accessToken = TestAccessTokens.moderator,
                     ).andExpect(status().isForbidden)
 
                     orderItem().status shouldBe OrderItemStatus.PAID_PENDING_SHIPMENT

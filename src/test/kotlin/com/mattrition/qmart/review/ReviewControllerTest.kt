@@ -53,7 +53,7 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = POST,
                 path = "$BASE_PATH/listing/${listing1.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = CreateReviewRequest(body = "New Review", score = 5),
             ).andExpect(status().isCreated)
 
@@ -73,7 +73,7 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = POST,
                 path = "$BASE_PATH/listing/${sampleListing1.id}",
-                token = null,
+                accessToken = null,
                 body = request,
             ).andExpect(status().isForbidden)
         }
@@ -89,7 +89,7 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = POST,
                 path = "$BASE_PATH/listing/${sampleListing1.id}",
-                token = TestTokens.moderator,
+                accessToken = TestAccessTokens.moderator,
                 body = request,
             ).andExpect(status().isForbidden)
         }
@@ -105,7 +105,7 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = POST,
                 path = "$BASE_PATH/listing/${sampleListing1.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = CreateReviewRequest(body = "Second review", score = 5),
             ).andExpect(status().isForbidden)
         }
@@ -123,7 +123,7 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/listing/${sampleListing1.id}",
-                token = null,
+                accessToken = null,
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].userId").value(TestUsers.admin.id.toString()))
@@ -135,7 +135,7 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id}",
-                token = null,
+                accessToken = null,
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(
@@ -162,14 +162,14 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${userReview.id}",
-                token = null,
+                accessToken = null,
                 body = editBody,
             ).andExpect(status().isForbidden)
 
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${userReview.id}",
-                token = TestTokens.superadmin,
+                accessToken = TestAccessTokens.superadmin,
                 body = editBody,
             ).andExpect(status().isForbidden)
         }
@@ -179,14 +179,14 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${userReview.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = EditReviewRequest(newBody = null, newScore = 0),
             ).andExpect(status().isBadRequest)
 
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${userReview.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = EditReviewRequest(newBody = null, newScore = 6),
             ).andExpect(status().isBadRequest)
         }
@@ -204,7 +204,7 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${userReview.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = editBody,
             ).andExpect(status().isOk)
 
@@ -234,13 +234,16 @@ class ReviewControllerTest : BaseH2Test() {
 
         @Test
         fun `should return 403 forbidden on mismatch user ID`() {
-            mockRequest(requestType = DELETE, path = "$BASE_PATH/${userReview.id}", token = null)
-                .andExpect(status().isForbidden)
+            mockRequest(
+                requestType = DELETE,
+                path = "$BASE_PATH/${userReview.id}",
+                accessToken = null,
+            ).andExpect(status().isForbidden)
 
             mockRequest(
                 requestType = DELETE,
                 path = "$BASE_PATH/${userReview.id}",
-                token = TestTokens.superadmin,
+                accessToken = TestAccessTokens.superadmin,
             ).andExpect(status().isForbidden)
         }
 
@@ -253,7 +256,7 @@ class ReviewControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = DELETE,
                 path = "$BASE_PATH/${userReview.id}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isNoContent)
 
             val listingReviews = reviewRepository.findReviewsByListingId(sampleListing1.id!!)
@@ -274,7 +277,7 @@ class ReviewControllerTest : BaseH2Test() {
         mockRequest(
             requestType = POST,
             path = "$BASE_PATH/listing/${sampleListing1.id}",
-            token = TestTokens.user,
+            accessToken = TestAccessTokens.user,
             body = review1,
         )
 
@@ -283,7 +286,7 @@ class ReviewControllerTest : BaseH2Test() {
         mockRequest(
             requestType = POST,
             path = "$BASE_PATH/listing/${sampleListing2.id}",
-            token = TestTokens.user,
+            accessToken = TestAccessTokens.user,
             body = review2,
         )
 
@@ -292,7 +295,7 @@ class ReviewControllerTest : BaseH2Test() {
         mockRequest(
             requestType = POST,
             path = "$BASE_PATH/listing/${sampleListing1.id}",
-            token = TestTokens.admin,
+            accessToken = TestAccessTokens.admin,
             body = review3,
         )
     }

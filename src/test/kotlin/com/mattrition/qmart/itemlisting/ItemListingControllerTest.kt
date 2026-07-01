@@ -53,7 +53,7 @@ class ItemListingControllerTest : BaseH2Test() {
                     categoryName = "Uncategorized",
                 )
 
-            mockRequest(requestType = POST, path = BASE_PATH, token = null, body = listing)
+            mockRequest(requestType = POST, path = BASE_PATH, accessToken = null, body = listing)
                 .andExpect(status().isForbidden)
         }
 
@@ -77,7 +77,7 @@ class ItemListingControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = POST,
                 path = BASE_PATH,
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = listing,
             ).andExpect(status().isCreated)
 
@@ -93,7 +93,7 @@ class ItemListingControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/seller/${TestUsers.moderator.id}",
-                token = null,
+                accessToken = null,
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$[0].sellerUsername").value(TestUsers.moderator.username))
         }
@@ -103,28 +103,31 @@ class ItemListingControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = GET,
                 path = "$BASE_PATH/seller/${UUID.randomUUID()}",
-                token = null,
+                accessToken = null,
             ).andExpect(status().isNotFound)
         }
 
         @Test
         fun `should get all item listings`() {
-            mockRequest(requestType = GET, path = BASE_PATH, token = null)
+            mockRequest(requestType = GET, path = BASE_PATH, accessToken = null)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(2))
         }
 
         @Test
         fun `should get single item listing by id`() {
-            mockRequest(requestType = GET, path = "$BASE_PATH/${listing1.id}", token = null)
+            mockRequest(requestType = GET, path = "$BASE_PATH/${listing1.id}", accessToken = null)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.id").value(listing1.id.toString()))
         }
 
         @Test
         fun `should return 404 not found on unknown listing id`() {
-            mockRequest(requestType = GET, path = "$BASE_PATH/${UUID.randomUUID()}", token = null)
-                .andExpect(status().isNotFound)
+            mockRequest(
+                requestType = GET,
+                path = "$BASE_PATH/${UUID.randomUUID()}",
+                accessToken = null,
+            ).andExpect(status().isNotFound)
         }
 
         @Nested
@@ -161,7 +164,7 @@ class ItemListingControllerTest : BaseH2Test() {
                     mockRequest(
                         requestType = GET,
                         path = "$BASE_PATH/category/${sampleCategory.slug}",
-                        token = null,
+                        accessToken = null,
                     ).andExpect(status().isOk)
                         .andReturn()
 
@@ -179,7 +182,7 @@ class ItemListingControllerTest : BaseH2Test() {
                 mockRequest(
                     requestType = GET,
                     path = "$BASE_PATH/category/${sampleCategory.slug}",
-                    token = null,
+                    accessToken = null,
                 ).andExpect(status().isNotFound)
             }
         }
@@ -203,7 +206,7 @@ class ItemListingControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${listing1.id}",
-                token = TestTokens.moderator,
+                accessToken = TestAccessTokens.moderator,
                 body = req,
             ).andExpect(status().isOk)
 
@@ -220,7 +223,7 @@ class ItemListingControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${listing1.id}",
-                token = null,
+                accessToken = null,
                 body = UpdateListingRequest(price = BigDecimal(0)),
             ).andExpect(status().isForbidden)
         }
@@ -230,7 +233,7 @@ class ItemListingControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = PATCH,
                 path = "$BASE_PATH/${listing1.id}",
-                token = TestTokens.moderator,
+                accessToken = TestAccessTokens.moderator,
                 body = UpdateListingRequest(price = BigDecimal(-1)),
             ).andExpect(status().isBadRequest)
         }

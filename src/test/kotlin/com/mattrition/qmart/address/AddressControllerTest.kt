@@ -59,13 +59,13 @@ class AddressControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = HttpMethod.GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id}",
-                token = null,
+                accessToken = null,
             ).andExpect(status().isForbidden)
 
             mockRequest(
                 requestType = HttpMethod.GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id!!}",
-                token = TestTokens.superadmin,
+                accessToken = TestAccessTokens.superadmin,
             ).andExpect(status().isForbidden)
         }
 
@@ -74,7 +74,7 @@ class AddressControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = HttpMethod.GET,
                 path = "$BASE_PATH/primary/${TestUsers.user.id!!}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.isPrimary").value(true))
         }
@@ -84,7 +84,7 @@ class AddressControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = HttpMethod.GET,
                 path = "$BASE_PATH/user/${TestUsers.user.id!!}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(2))
         }
@@ -97,7 +97,7 @@ class AddressControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = HttpMethod.POST,
                 path = BASE_PATH,
-                token = null,
+                accessToken = null,
                 body = AddressMapper.toDto(sampleAddress1),
             ).andExpect(status().isForbidden)
         }
@@ -109,7 +109,7 @@ class AddressControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = HttpMethod.POST,
                 path = BASE_PATH,
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = AddressMapper.toDto(sampleAddress2),
             ).andExpect(status().isCreated)
 
@@ -131,7 +131,7 @@ class AddressControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = HttpMethod.POST,
                 path = BASE_PATH,
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
                 body = AddressMapper.toDto(sampleAddress1),
             ).andExpect(status().isBadRequest)
         }
@@ -151,13 +151,13 @@ class AddressControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = HttpMethod.DELETE,
                 path = "$BASE_PATH/${savedAddress.id!!}",
-                token = null,
+                accessToken = null,
             ).andExpect(status().isForbidden)
 
             mockRequest(
                 requestType = HttpMethod.DELETE,
                 path = "$BASE_PATH/${savedAddress.id!!}",
-                token = TestTokens.superadmin,
+                accessToken = TestAccessTokens.superadmin,
             ).andExpect(status().isForbidden)
         }
 
@@ -173,7 +173,7 @@ class AddressControllerTest : BaseH2Test() {
             mockRequest(
                 requestType = HttpMethod.DELETE,
                 path = "$BASE_PATH/${savedAddress.id!!}",
-                token = TestTokens.user,
+                accessToken = TestAccessTokens.user,
             ).andExpect(status().isOk)
 
             addressRepository.findById(savedAddress.id!!).getOrNull().shouldBeNull()
