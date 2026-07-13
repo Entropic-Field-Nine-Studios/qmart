@@ -2,12 +2,15 @@ package com.mattrition.qmart.user
 
 import com.mattrition.qmart.BaseH2Test
 import com.mattrition.qmart.user.dto.RegistrationInfo
+import com.mattrition.qmart.user.dto.UserDto
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 class UserControllerTest : BaseH2Test() {
@@ -18,36 +21,8 @@ class UserControllerTest : BaseH2Test() {
     @Nested
     inner class GetUsers {
         @Test
-        fun `should return 403 forbidden when no auth`() {
-            mockRequest(requestType = GET, path = BASE_PATH, accessToken = null)
-                .andExpect(status().isUnauthorized)
-        }
-
-        @Test
-        fun `should return 403 forbidden if user`() {
-            mockRequest(requestType = GET, path = BASE_PATH, accessToken = TestAccessTokens.user)
-                .andExpect(status().isForbidden)
-        }
-
-        @Test
-        fun `should return 200 ok if moderator`() {
-            mockRequest(
-                requestType = GET,
-                path = BASE_PATH,
-                accessToken = TestAccessTokens.moderator,
-            ).andExpect(status().isOk)
-        }
-
-        @Test
-        fun `should return 200 ok if admin`() {
-            mockRequest(requestType = GET, path = BASE_PATH, accessToken = TestAccessTokens.admin)
-                .andExpect(status().isOk)
-        }
-
-        @Test
-        fun `should return 200 ok if superadmin`() {
-            mockRequest(requestType = GET, path = BASE_PATH, TestAccessTokens.superadmin)
-                .andExpect(status().isOk)
+        fun `should allow access to moderators and up`() {
+            testPermissions(requestType = GET, path = BASE_PATH, minRole = UserRole.MODERATOR)
         }
     }
 
@@ -55,9 +30,18 @@ class UserControllerTest : BaseH2Test() {
     inner class GetUserByUsername {
         @Test
         fun `should retrieve admin by username`() {
-            mockRequest(requestType = GET, path = "$BASE_PATH/username/aDMin", accessToken = null)
-                .andExpect(status().isOk)
-                .andExpect(jsonPath("$.username").value("Admin"))
+            val result =
+                mockRequest(
+                    requestType = GET,
+                    path = "$BASE_PATH/username/aDMin",
+                    accessToken = null,
+                ).andExpect(status().isOk)
+                    .andReturn()
+
+            val body = result.response.contentAsString
+            val user = objectMapper.readValue<UserDto>(body)
+
+            user.username shouldBe "Admin"
         }
 
         @Test

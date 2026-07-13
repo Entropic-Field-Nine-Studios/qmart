@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
 import java.math.BigDecimal
 import kotlin.jvm.optionals.getOrNull
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.minutes
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -127,7 +127,7 @@ abstract class BaseH2Test {
                     username = seed.username,
                     id = newUser.id!!,
                     role = newUser.role,
-                    expirationMillis = 5.seconds.inWholeMilliseconds,
+                    expirationMillis = 5.minutes.inWholeMilliseconds,
                 )
 
             val refreshToken =
@@ -135,7 +135,7 @@ abstract class BaseH2Test {
                     username = seed.username,
                     id = newUser.id!!,
                     role = newUser.role,
-                    expirationMillis = 10.seconds.inWholeMilliseconds,
+                    expirationMillis = 10.minutes.inWholeMilliseconds,
                 )
 
             when (seed.role.uppercase()) {
@@ -278,8 +278,10 @@ abstract class BaseH2Test {
             .andExpect(guestMatcher)
 
         TestAccessTokens.toMap().forEach { (role, accessToken) ->
+            // Expect successful response if iterated role is equal to or
+            // better than the minimum required
             val expectedStatusMatcher =
-                if (UserRole.compare(minRole ?: "", role) >= 0) {
+                if (UserRole.compare(role, minRole ?: "") >= 0) {
                     status().is2xxSuccessful
                 } else {
                     status().isForbidden
